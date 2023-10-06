@@ -79,17 +79,17 @@ router.post('/forget-password', async (req, res) => {
     to: username,
     subject: "password reset request",
     text: `random string is${randomString}`,
-    html:`<h2>The link for reset your password will expire in 1 hour.<a href='#'>Reset Password </a> random string: ${randomString}</h2>`
+    html:`<h2>The link for reset your password will expire in 1 hour.<a href='http://localhost:3000/reset-password/${randomString}'>Reset Password Link</a></h2>`
   };
 
   transporter.sendMail(sendEmail, (err, info) => {
     if (err) {
       console.log("Error sending email", err)
-      res.status(500).json({ Error: "Email not sent" })
+      res.status(500).json({ error: "Email not sent" })
     }
     else {
       console.log("Email sent", info.response)
-      res.status(200).json({ message: "Email sent successfully" })
+      res.status(200).json({ message: "Email sent successfully,check your email click that Reset Password Link" })
     }
   })
 
@@ -97,7 +97,7 @@ router.post('/forget-password', async (req, res) => {
 
 router.post('/reset-password/:randomString',async (req,res)=>{
   const randomString = req.params.randomString
-  const {newPassword} = req.body
+  const {newPassword,confirmPassword} = req.body
   
   try{
      const randomstring = await getUserByRandomString(randomString)
@@ -113,6 +113,12 @@ router.post('/reset-password/:randomString',async (req,res)=>{
      if (currentTime > randomStringExpiration) {
       return res.status(400).json({ error: 'random string has expired' });
     }
+
+    //check newPassword and confirmPassword are same
+    if(newPassword!==confirmPassword){
+      return res.status(404).json({ error: 'New password and confirm password are not same' });
+    }
+
     // Update the user's password
     const hashedPassword = await genPassword(newPassword)
     const updatePassword = await updateNewPassword(randomstring,hashedPassword)
