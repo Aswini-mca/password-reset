@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
     return
   }
   const token = generateToken(userFromDB._id)
-  res.status(201).json({ message: "Login successful", token })
+  res.status(201).json({ message: "Login successfully", token })
 })
 
 router.post('/forget-password', async (req, res) => {
@@ -79,7 +79,7 @@ router.post('/forget-password', async (req, res) => {
     to: username,
     subject: "password reset request",
     text: `random string is${randomString}`,
-    html: `<h2>The link for reset your password will expire in 1 hour.<a href='http://localhost:3000/reset-password/${randomString}'>Reset Password Link</a></h2>`
+    html: `<h2>The link for reset your password will expire in 1 hour.<a href='http://localhost:3000/reset-password/${randomString}'>Reset Password Link</a>Random string is:${randomString}</h2>`
   };
 
   transporter.sendMail(sendEmail, (err, info) => {
@@ -112,6 +112,12 @@ router.post('/reset-password/:randomString', async (req, res) => {
     // Check if the random string has expired
     if (currentTime > randomStringExpiration) {
       return res.status(400).json({ error: 'random string has expired' });
+    }
+    
+    //check newPassword pattern
+    if (!/^(?=.*?[0-9])(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[#!@%$_]).{8,}$/g.test(newPassword)) {
+      res.status(400).send({ error: "password pattern does not match" })
+      return
     }
 
     //check newPassword and confirmPassword are same
