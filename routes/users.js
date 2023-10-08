@@ -79,7 +79,7 @@ router.post('/forget-password', async (req, res) => {
     to: username,
     subject: "password reset request",
     text: `random string is${randomString}`,
-    html: `<h2>The link for reset your password will expire in 1 hour.<a href='http://localhost:3000/reset-password/${randomString}'>Reset Password Link</a>Random string is:${randomString}</h2>`
+    html: `<h2>The link for reset your password will expire in 1 hour.<a href='http://localhost:3000/reset-password/${randomString}'>http://localhost:3000/reset-password/${randomString}</a></h2>`
   };
 
   transporter.sendMail(sendEmail, (err, info) => {
@@ -89,7 +89,7 @@ router.post('/forget-password', async (req, res) => {
     }
     else {
       console.log("Email sent", info.response)
-      res.status(200).json({ message: "Email sent successfully,check your email click that Reset Password Link" })
+      res.status(200).json({ message: "Email sent successfully,click that Reset Password Link" ,randomString})
     }
   })
 
