@@ -4,10 +4,11 @@ import nodemailer from 'nodemailer'
 import { genPassword, createUser, getUserByName, genRandomString, generateToken, storeRandom, getUserByRandomString, updateNewPassword } from '../helpers.js';
 const router = express.Router()
 
+//signup API
 router.post('/signup', async (req, res) => {
   const { username, password } = req.body;
-  // console.log(username,password)
   const isUserExist = await getUserByName(username)
+
   //validate username
   if (isUserExist) {
     res.status(400).send({ error: "Username already exists" })
@@ -29,6 +30,7 @@ router.post('/signup', async (req, res) => {
   res.status(201).json({ message: "Successfully Created" })
 })
 
+//login API
 router.post('/login', async (req, res) => {
   const { username, password } = req.body
   const userFromDB = await getUserByName(username)
@@ -48,6 +50,7 @@ router.post('/login', async (req, res) => {
   res.status(201).json({ message: "Login successfully", token })
 })
 
+//forget password API
 router.post('/forget-password', async (req, res) => {
   const { username } = req.body
   const userFromDB = await getUserByName(username)
@@ -62,6 +65,7 @@ router.post('/forget-password', async (req, res) => {
   const expirationTime = Date.now() + 60 * 60 * 1000 //Expires in 1 hour
   const randomStringExpiresAt = new Date(expirationTime)
   const storeRandomStringDb = await storeRandom(randomString, userFromDB, randomStringExpiresAt)
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
@@ -77,7 +81,7 @@ router.post('/forget-password', async (req, res) => {
   const sendEmail = {
     from: process.env.email,
     to: username,
-    subject: "password reset request",
+    subject: "Password Reset Link",
     text: `random string is${randomString}`,
     html: `<h2>The link for reset your password will expire in 1 hour.<a href='http://localhost:3000/reset-password/${randomString}'>http://localhost:3000/reset-password/${randomString}</a></h2>`
   };
@@ -89,12 +93,13 @@ router.post('/forget-password', async (req, res) => {
     }
     else {
       console.log("Email sent", info.response)
-      res.status(200).json({ message: "Email sent successfully,click that Reset Password Link" ,randomString})
+      res.status(200).json({ message: "Email sent successfully,click that Reset Password Link", randomString })
     }
   })
 
 })
 
+//reset password API
 router.post('/reset-password/:randomString', async (req, res) => {
   const randomString = req.params.randomString
   const { newPassword, confirmPassword } = req.body
@@ -113,7 +118,7 @@ router.post('/reset-password/:randomString', async (req, res) => {
     if (currentTime > randomStringExpiration) {
       return res.status(400).json({ error: 'random string has expired' });
     }
-    
+
     //check newPassword pattern
     if (!/^(?=.*?[0-9])(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[#!@%$_]).{8,}$/g.test(newPassword)) {
       res.status(400).send({ error: "password pattern does not match" })
