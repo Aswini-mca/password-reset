@@ -83,7 +83,7 @@ router.post('/forget-password', async (req, res) => {
     to: username,
     subject: "Password Reset Link",
     text: `random string is${randomString}`,
-    html: `<h2>The link for reset your password will expire in 1 hour.<a href='http://localhost:3000/reset-password/${randomString}'>http://localhost:3000/reset-password/${randomString}</a></h2>`
+    html: `<h2>The link for reset your password will expire in 1 hour.<a href='https://playful-belekoy-0a8f26.netlify.app/reset-password/${randomString}'>https://playful-belekoy-0a8f26.netlify.app/reset-password/${randomString}</a></h2>`
   };
 
   transporter.sendMail(sendEmail, (err, info) => {
